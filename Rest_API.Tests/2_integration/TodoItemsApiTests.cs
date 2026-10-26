@@ -1,13 +1,28 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Rest_API.Tests;
 
+
+
 public class ToDoItemsApiTests
 {
+
+
+private static ToDoItemDbContext CreateDbContext()
+{
+    var options = new DbContextOptionsBuilder<ToDoItemDbContext>()
+        .UseInMemoryDatabase(Guid.NewGuid().ToString())
+        .Options;
+
+    return new ToDoItemDbContext(options);
+}
     [Fact]
     public async Task GetAll_ReturnsOK() // GET returnerer 200 ok
     {
-        IToDoItemService _itemService = new ToDoItemService();
+        using var dbContext = CreateDbContext();
+
+        IToDoItemService _itemService = new ToDoItemService(dbContext);
         ToDoItemsController controller = new ToDoItemsController(_itemService);
         
         var task = await controller.GetAll();
@@ -17,17 +32,27 @@ public class ToDoItemsApiTests
     [Fact]
     public async Task GetById_KnownId_ReturnsNotFound() // GET med ukjent ID returnerer 200 ok.
     {
-        IToDoItemService _itemService = new ToDoItemService();
+         using var dbContext = CreateDbContext();
+
+         dbContext.Tasks.Add(new ToDoItem(
+            "Testoppgave",
+            "Beskrivelse",
+            null
+        ));
+
+        IToDoItemService _itemService = new ToDoItemService(dbContext);
         ToDoItemsController controller = new ToDoItemsController(_itemService);
         
-        var task = await controller.GetById(2);
+        var task = await controller.GetById(1);
 
         Assert.IsType<OkObjectResult>(task.Result);
     }
     [Fact]
     public async Task GetById_UnknownId_ReturnsNotFound() // GET med ukjent ID returnerer 404 Not Found.
     {
-        IToDoItemService _itemService = new ToDoItemService();
+         using var dbContext = CreateDbContext();
+
+        IToDoItemService _itemService = new ToDoItemService(dbContext);
         ToDoItemsController controller = new ToDoItemsController(_itemService);
         
         var task = await controller.GetById(-1);
@@ -37,7 +62,9 @@ public class ToDoItemsApiTests
     [Fact]
     public async Task Create_ValidRequest_ReturnsCreated() // POST returnerer 201 Created.
     {
-        IToDoItemService _itemService = new ToDoItemService();
+         using var dbContext = CreateDbContext();
+
+        IToDoItemService _itemService = new ToDoItemService(dbContext);
         ToDoItemsController controller = new ToDoItemsController(_itemService);
         CreateToDoItemRequest request = new CreateToDoItemRequest();
         request.Title = "A title";
@@ -50,7 +77,9 @@ public class ToDoItemsApiTests
     [Fact]
     public async Task Create_EmptyTitle_ReturnsBadRequest() // POST med ugyldig tittel returnerer 400 Bad Request.
     {
-        IToDoItemService _itemService = new ToDoItemService();
+         using var dbContext = CreateDbContext();
+
+        IToDoItemService _itemService = new ToDoItemService(dbContext);
         ToDoItemsController controller = new ToDoItemsController(_itemService);
         CreateToDoItemRequest request = new CreateToDoItemRequest();
         CreateToDoItemRequest request2 = new CreateToDoItemRequest();
@@ -66,7 +95,9 @@ public class ToDoItemsApiTests
     [Fact]
     public async Task Create_ThenGet_ReturnsCreatedItem() // En opprettet oppgave kan hentes igjen.
     {
-        IToDoItemService _itemService = new ToDoItemService();
+         using var dbContext = CreateDbContext();
+
+        IToDoItemService _itemService = new ToDoItemService(dbContext);
         ToDoItemsController controller = new ToDoItemsController(_itemService);
         CreateToDoItemRequest request = new CreateToDoItemRequest();
         request.Title = "A Title";

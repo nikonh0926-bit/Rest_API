@@ -1,20 +1,40 @@
+using Microsoft.EntityFrameworkCore;
+
 namespace Rest_API.Tests;
 
-public class ToDoItemServiceTests
+public class ToDoItemServiceTests()
 {
+    private static ToDoItemDbContext CreateDbContext()
+{
+        var options = new DbContextOptionsBuilder<ToDoItemDbContext>()
+        .UseInMemoryDatabase(Guid.NewGuid().ToString())
+        .Options;
+
+    return new ToDoItemDbContext(options);
+}
     [Fact]
     public async Task GetAllAsync_ReturnsAllItems() // alle opprettede oppgaver returneres
     {
-        IToDoItemService _itemService = new ToDoItemService();
+        using var dbContext = CreateDbContext();
+
+        dbContext.Tasks.Add(new ToDoItem(
+            "Testoppgave",
+            "Beskrivelse",
+            null
+        ));
+
+        IToDoItemService _itemService = new ToDoItemService(dbContext);
 
         var task = await _itemService.GetAllAsync();
 
-        Assert.Equal(task.Count, DeveloperTestData.MasterList.Count);
+        Assert.Equal(task.Count, dbContext.Tasks.Count());
     }
     [Fact]
     public async Task GetByIdAsync_ExistingId_ReturnsItem() // Riktig oppgave returneres for en eksisterende ID.
     {
-        IToDoItemService _itemService = new ToDoItemService();
+        using var dbContext = CreateDbContext();
+
+        IToDoItemService _itemService = new ToDoItemService(dbContext);
         CreateToDoItemRequest request = new CreateToDoItemRequest();
         request.Title = "A Title";
 
@@ -29,7 +49,9 @@ public class ToDoItemServiceTests
     [Fact]
     public async Task GetByIdAsync_UnknownId_ReturnsNull() // En ukjent ID gir null.
     {
-        IToDoItemService _itemService = new ToDoItemService();
+        using var dbContext = CreateDbContext();
+
+        IToDoItemService _itemService = new ToDoItemService(dbContext);
         var task = await _itemService.GetByIdAsync(-1);
 
         Assert.Null(task);
@@ -37,7 +59,9 @@ public class ToDoItemServiceTests
     [Fact]
     public async Task CreateAsync_ValidRequest_CreatesItem() // En gyldig forespørsel oppretter en oppgave med riktig innhold.
     {
-        IToDoItemService _itemService = new ToDoItemService();
+        using var dbContext = CreateDbContext();
+
+        IToDoItemService _itemService = new ToDoItemService(dbContext);
         CreateToDoItemRequest request = new CreateToDoItemRequest();
         request.Title = "A Title";
 
@@ -51,7 +75,9 @@ public class ToDoItemServiceTests
     [Fact]
     public async Task CreateAsync_AssignsUniqueIds() // To nye oppgaver får forskjellige ID-er.
     {
-        IToDoItemService _itemService = new ToDoItemService();
+        using var dbContext = CreateDbContext();
+
+        IToDoItemService _itemService = new ToDoItemService(dbContext);
         CreateToDoItemRequest request = new CreateToDoItemRequest();
         CreateToDoItemRequest request2 = new CreateToDoItemRequest();
         request.Title = "A Title";
@@ -70,7 +96,9 @@ public class ToDoItemServiceTests
     [Fact]
     public async Task CreateAsync_SetsCreatedAt() // Opprettelsestidspunktet settes av tjenesten.
     {
-        IToDoItemService _itemService = new ToDoItemService();
+        using var dbContext = CreateDbContext();
+
+        IToDoItemService _itemService = new ToDoItemService(dbContext);
 
         DateTime beforeCreation = DateTime.UtcNow;
         
