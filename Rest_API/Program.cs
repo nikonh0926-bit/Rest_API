@@ -1,30 +1,46 @@
+using Microsoft.EntityFrameworkCore;
 
-    var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
-    // Add services to the container.
+// Add services to the container.
 
-    builder.WebHost.UseUrls("https://localhost:9001");
+builder.WebHost.UseUrls("https://localhost:9001");
 
-    builder.Services.AddControllers();
-    builder.Services.AddEndpointsApiExplorer();
-    builder.Services.AddOpenApi();
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddOpenApi();
+builder.Services.AddSwaggerGen();
 
-    builder.Services.AddScoped<
-        IToDoItemService,
-        ToDoItemService>();
+builder.Services.AddDbContext<ToDoItemDbContext>(options =>
+options.UseSqlServer(
+    builder.Configuration.GetConnectionString("DefaultConnection")
+)
+);
 
-    var app = builder.Build();
+builder.Services.AddScoped<
+    IToDoItemService,
+    ToDoItemService>();
 
-    // Configure the HTTP request pipeline.
-    if (app.Environment.IsDevelopment())
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+
+    app.UseSwaggerUI(options =>
     {
-        app.MapOpenApi();
-    }
+        options.SwaggerEndpoint(
+            "/openapi/v1.json",
+            "Rest_API v1"
+        );
+    });
+}
 
-    app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 
-    app.UseAuthorization();
+app.UseAuthorization();
 
-    app.MapControllers();
+app.MapControllers();
 
-    app.Run();
+app.Run();
