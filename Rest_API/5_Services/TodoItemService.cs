@@ -1,21 +1,17 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
-public class ToDoItemService : IToDoItemService
+public class ToDoItemService(ToDoItemDbContext dbContext) : IToDoItemService
 {
     
     public async Task<IReadOnlyList<ToDoItem>> GetAllAsync()
     {
-        return DeveloperTestData.MasterList;
+        return await dbContext.Tasks.ToListAsync();
     }
     public async Task<ToDoItem?> GetByIdAsync(int id)
     {
-        foreach(ToDoItem task in DeveloperTestData.MasterList)
-        {
-            if(task.Id == id)
-                return task;
-        }
-        return null;
+        return await dbContext.Tasks.FindAsync(id);
     }
     public async Task<ToDoItem?> CreateAsync(CreateToDoItemRequest request)
     {
@@ -24,7 +20,8 @@ public class ToDoItemService : IToDoItemService
         try
         {
             ToDoItem newItem = new ToDoItem(request.Title, request.Description, request.DueDate);
-            DeveloperTestData.MasterList.Add(newItem);
+            dbContext.Tasks.Add(newItem);
+            await dbContext.SaveChangesAsync();
             return newItem;
         }
         catch (Exception e)
