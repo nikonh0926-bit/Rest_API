@@ -1,12 +1,13 @@
-public class ToDoItem(string title, string? description, DateTime? dueDate)
+/*
+public class ToDoItem()
 {
     [System.ComponentModel.DataAnnotations.Key]
-    public int Id {get; init;} = GetNextId(); // fjern GetNextID() etter utviklingsfase
-    public string Title {get;} = title;
-    public string? Description {get;} = description;
-    public bool IsCompleted {get; set;} = false;
-    public DateTime CreatedAt {get;} = DateTime.UtcNow;
-    public DateTime? DueDate {get; set;} = dueDate;
+    public long Id {get; set;} //= GetNextId(); // fjern GetNextID() etter utviklingsfase
+    public string Title {get; set;} = string.Empty;
+    public string? Description {get; set;}
+    public bool IsCompleted {get; set;}
+    public DateTime CreatedAt {get; set;}
+    public DateTime? DueDate {get; set;}
 
     // ----------------------------------
     //temporary løsning for unik id
@@ -16,5 +17,35 @@ public class ToDoItem(string title, string? description, DateTime? dueDate)
     {
         return _nextId++;
     }
-    // ---------------------------------
+    // --------------------------------
+}
+*/
+public class ToDoItem
+{
+    public int Id { get; set; }
+
+    public string Title { get; set; } = string.Empty;
+
+    public string? Description { get; set; }
+
+    public bool IsCompleted { get; set; }
+
+    public DateTime CreatedAt { get; set; }
+
+    public DateTime? DueDate { get; set; }
+
+    // EF Core kan bruke denne konstruktøren.
+    public ToDoItem()
+    {
+    }
+
+    // Brukes når du oppretter oppgaver fra API-et.
+    public ToDoItem(string title, string? description, DateTime? dueDate)
+    {
+        Title = title;
+        Description = description;
+        DueDate = dueDate;
+        CreatedAt = DateTime.UtcNow;
+        IsCompleted = false;
+    }
 }
