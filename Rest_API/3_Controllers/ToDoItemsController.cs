@@ -1,28 +1,54 @@
-using System.Text.Json;
+using Microsoft.AspNetCore.Mvc;
 
-public class ToDoItemsController
+[ApiController]
+
+[Route("ToDoItem")]
+public class ToDoItemsController(IToDoItemService _itemService) : ControllerBase
 {
-    public static Task<IReadOnlyList<ToDoItem>> GetAll() // Henter alle oppgaver og returnerer 200 OK.
+    [HttpGet]
+    public async Task<ActionResult<IReadOnlyList<ToDoItem>>> GetAll() // Henter alle oppgaver og returnerer 200 OK.
     {
         try
         {
-            
-        }
-        catch(JsonException e)
-        {
-            Logger.LogError(e);
+            var tasks = await _itemService.GetAllAsync();
+            return Ok(tasks);
         }
         catch(Exception e)
         {
             Logger.LogCritical(e);
+            return BadRequest();
         }
     }
-    public static Task<ToDoItem> GetByInt(int id) // Henter én oppgave. Returnerer 404 Not Found hvis den ikke finnes.
+    [HttpGet("{id:int}")]
+    public async Task<ActionResult<ToDoItem?>> GetById(int id) // Henter én oppgave. Returnerer 404 Not Found hvis den ikke finnes.
     {
-        
+        try
+        {
+            var task = await _itemService.GetByIdAsync(id);
+
+            if(task == null)
+                return NotFound();
+            return Ok(task);
+        }
+        catch(Exception e)
+        {
+            Logger.LogCritical(e);
+            return BadRequest();
+        }
     }
-    public static Task Create(CreateToDoItemRequest request) // Validerer forespørselen, ber tjenesten opprette oppgaven og returnerer 201 Created.
+    [HttpPost]
+    public async Task<ActionResult> Create(CreateToDoItemRequest request) // Validerer forespørselen, ber tjenesten opprette oppgaven og returnerer 201 Created.
     {
-        
+
+        var task = await _itemService.CreateAsync(request);
+        if (task != null)
+        {
+            return CreatedAtAction(
+            nameof(GetById),
+            new { id = task.Id },
+            task
+            );
+        }
+        return BadRequest();
     }
 }

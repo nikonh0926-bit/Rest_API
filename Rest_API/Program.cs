@@ -1,23 +1,30 @@
-var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+    var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddOpenApi();
+    // Add services to the container.
 
-var app = builder.Build();
+    builder.WebHost.UseUrls("https://localhost:9001");
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
+    builder.Services.AddControllers();
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddOpenApi();
 
-app.UseHttpsRedirection();
+    builder.Services.AddScoped<
+        IToDoItemService,
+        ToDoItemService>();
 
-app.UseAuthorization();
+    var app = builder.Build();
 
-app.MapControllers();
+    // Configure the HTTP request pipeline.
+    if (app.Environment.IsDevelopment())
+    {
+        app.MapOpenApi();
+    }
 
-app.Run();
+    app.UseHttpsRedirection();
+
+    app.UseAuthorization();
+
+    app.MapControllers();
+
+    app.Run();
