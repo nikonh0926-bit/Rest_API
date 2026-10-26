@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Rest_API.Tests;
@@ -31,7 +30,7 @@ public class ToDoItemsApiTests
         IToDoItemService _itemService = new ToDoItemService();
         ToDoItemsController controller = new ToDoItemsController(_itemService);
         
-        var task = await controller.GetById(10);
+        var task = await controller.GetById(-1);
 
         Assert.IsType<NotFoundResult>(task.Result);
     }
