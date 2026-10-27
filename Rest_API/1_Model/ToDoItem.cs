@@ -1,25 +1,3 @@
-/*
-public class ToDoItem()
-{
-    [System.ComponentModel.DataAnnotations.Key]
-    public long Id {get; set;} //= GetNextId(); // fjern GetNextID() etter utviklingsfase
-    public string Title {get; set;} = string.Empty;
-    public string? Description {get; set;}
-    public bool IsCompleted {get; set;}
-    public DateTime CreatedAt {get; set;}
-    public DateTime? DueDate {get; set;}
-
-    // ----------------------------------
-    //temporary løsning for unik id
-    private static int _nextId = 1;
-
-    public static int GetNextId()
-    {
-        return _nextId++;
-    }
-    // --------------------------------
-}
-*/
 public class ToDoItem
 {
     public int Id { get; set; }
