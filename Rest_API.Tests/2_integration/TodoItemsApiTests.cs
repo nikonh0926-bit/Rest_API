@@ -3,12 +3,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Rest_API.Tests;
 
-
-
 public class ToDoItemsApiTests
 {
-
-
 private static ToDoItemDbContext CreateDbContext()
 {
     var options = new DbContextOptionsBuilder<ToDoItemDbContext>()
@@ -30,7 +26,7 @@ private static ToDoItemDbContext CreateDbContext()
         Assert.IsType<OkObjectResult>(task.Result);
     }
     [Fact]
-    public async Task GetById_KnownId_ReturnsNotFound() // GET med ukjent ID returnerer 200 ok.
+    public async Task GetById_KnownId_ReturnsNotFound() // GET med kjent ID returnerer 200 ok.
     {
          using var dbContext = CreateDbContext();
 
